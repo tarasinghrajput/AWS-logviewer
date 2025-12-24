@@ -250,9 +250,9 @@
                 </div>
             `;
 
-            // 1. Try secure Netlify Function proxy first
+            // 1. Try secure Vercel Function proxy first
             try {
-                const response = await fetch('/.netlify/functions/generate-report', {
+                const response = await fetch('/api/generate-report', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 

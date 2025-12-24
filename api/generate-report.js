@@ -1,20 +1,20 @@
-export default async (req, context) => {
+export default async function handler(req, res) {
     // SECURITY: Only allow POST requests
-    if (req.method !== "POST") {
-        return new Response("Method Not Allowed", { status: 405 });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    // SECURITY: Get the API Key from Netlify Environment Variables
-    const apiKey = Netlify.env.get("GEMINI_API_KEY");
+    // SECURITY: Get the API Key from Vercel Environment Variables
+    // Make sure to add GEMINI_API_KEY in your Vercel Project Settings
+    const apiKey = process.env.GEMINI_API_KEY;
+    
     if (!apiKey) {
-        return new Response(JSON.stringify({ error: "Server configuration error: API Key missing" }), { 
-            status: 500,
-            headers: { "Content-Type": "application/json" } 
-        });
+        return res.status(500).json({ error: 'Server configuration error: API Key missing' });
     }
 
     try {
-        const { accessLogs, errorLogs } = await req.json();
+        // Vercel automatically parses the JSON body
+        const { accessLogs, errorLogs } = req.body;
 
         const prompt = `
             You are a Senior Site Reliability Engineer. 
@@ -73,14 +73,9 @@ export default async (req, context) => {
 
         const markdown = data.candidates[0].content.parts[0].text;
 
-        return new Response(JSON.stringify({ markdown }), {
-            headers: { "Content-Type": "application/json" }
-        });
+        return res.status(200).json({ markdown });
 
     } catch (error) {
-        return new Response(JSON.stringify({ error: error.message }), { 
-            status: 500,
-            headers: { "Content-Type": "application/json" } 
-        });
+        return res.status(500).json({ error: error.message });
     }
-};
+}
